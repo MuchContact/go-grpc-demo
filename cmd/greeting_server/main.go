@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net"
 
@@ -24,6 +25,23 @@ type server struct {
 func (s *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
 	return &pb.HelloReply{Message: "Hello " + in.GetName()}, nil
 }
+func (s *server) SayHelloTwo(ss pb.Greeter_SayHelloTwoServer) error {
+	for {
+		recv, err := ss.Recv()
+		if err == io.EOF {
+			fmt.Printf("end of stream")
+			return nil
+		} else if err != nil {
+			return err
+		}
+		name := recv.GetName()
+		fmt.Printf("Rec %v \n", name)
+		response := &pb.HelloReply{
+			Message: "Hello " + name,
+		}
+		ss.Send(response)
+	}
+}
 
 func main() {
 	flag.Parse()
@@ -34,7 +52,7 @@ func main() {
 	s := grpc.NewServer()
 	pb.RegisterGreeterServer(s, &server{})
 	// Register reflection service on gRPC server.
-	
+
 	reflection.Register(s)
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
