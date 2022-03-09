@@ -28,8 +28,9 @@ libprotoc 3.17.3
 #### 安装`Protocol buffer`编译器的`Go`插件
 
 ```bash
-$ go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.26
-$ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1
+go get github.com/gogo/protobuf/proto
+go get github.com/gogo/protobuf/protoc-gen-gogofaster
+go get github.com/gogo/protobuf/gogoproto
 ```
 
 安装好之后，配置`PATH`环境变量
@@ -38,15 +39,6 @@ $ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.1
 $ export PATH="$PATH:$(go env GOPATH)/bin"
 ```
 
-测试
-
-```bash
-$ protoc-gen-go --version
-protoc-gen-go v1.26.0
-
-$ protoc-gen-go-grpc -version
-protoc-gen-go-grpc 1.1.0
-```
 
 ### 创建项目
 
@@ -91,20 +83,19 @@ message HelloReply {
 
 ### 编译`protos/greeting.proto`文件，生成让服务端和客户端调用的代码
 
-这里我们的服务端都客户端代码都是用`Go`实现。所以使用`--go_out`, `--go-grpc_out`文件。
+这里我们的服务端都客户端代码都是用`Go`实现。所以使用`--gogofaster_out`文件。
 
 ```bash
-$ protoc --go_out=. --go-grpc_out=. protos/greeting.proto
+$ protoc -I.:${GOPATH}/src  --gogofaster_out=plugins=grpc:. protos/greeting.proto
 ```
 
-执行完上面的步骤之后，在`gen`目录下生成了两个文件。
+执行完上面的步骤之后，在`gen`目录下生成了一个文件。
 
 ```
 $ tree gen
 gen
 └── greeting
     ├── greeting.pb.go
-    └── greeting_grpc.pb.go
 ```
 
 **PS**:
